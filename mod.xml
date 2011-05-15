@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification application="Heroes of Newerth" appversion="-*" mmversion="1.1"
+	name="Bang! MIA toggle-Hotkey" version="0.1" date="15.05.2011"
+	description="Adds a Hotkey which needs to be pressed for the Mia Buttons to be visible"
+	author="Manu311">
+
+	<requirement name="Bang! MIA" version="*" />
+	
+	<editfile name="ui/mod_options_elements.package">
+		<find><![CDATA[<instance name="mod_keybind" mod_id="Bang_miss_Options"  action="Cmd" param="BangMiss1" cvar="bang_miss_button_11" label="Hero Icon 1 LeftClick"  table="game"  />]]></find>
+		<insert position="before">
+		<![CDATA[
+		<instance name="mod_keybind" mod_id="Bang_miss_Options"  action="Cmd" param="BangMissHold" cvar="bang_miss_button_311" label="Miss Hold Button"  table="game"  />
+		]]>
+		</insert>
+	</editfile>
+	
+	<editfile name="ui/bang_miss_alerts.package">
+		<find><![CDATA[<trigger name="bang_send_gm" />]]></find>
+		<insert position="after">	
+			<![CDATA[<trigger name="bang_miss_show" />
+			<trigger name="bang_miss_show_key" />]]>
+		</insert>
+		
+		<find><![CDATA[<!-- Controller 0: Lane. 1: Hero. 2: Trigger. 3: Icon -->]]></find>
+		<insert position="before">
+			<![CDATA[		
+				<panel noclick="1" 
+					onload="
+						CreateInt('bang_miss_time_match',0);
+						CreateInt('bang_miss_time_hold',0);
+						CreateBool('bang_miss_visible',false);
+						
+						Cmd('Alias BangMissHold Trigger bang_miss_show_key);
+					
+
+						"
+						
+					watch0="bang_miss_show_key"
+					ontrigger0="
+						if (!bang_miss_visible,
+							Set('bang_miss_time_hold',bang_miss_time_match+1000),
+							Set('bang_miss_time_hold',bang_miss_time_match+100));
+					"
+				
+					onframe="
+						bang_miss_time_match = GetTime();
+						if (bang_miss_time_hold gt bang_miss_time_match,
+							Split(Cmd('trigger bang_miss_show 1'), Set(bang_miss_visible, true)),
+							Split(Cmd('trigger bang_miss_show 0'), Set(bang_miss_visible, false)));
+				" />]]>
+		</insert>
+		
+		<find><![CDATA[<panel height="100%" width="20%" x="{x=0}" y="{y=0}" noclick="1" align="left" valign="center" watch="ScoreboardPlayer{index}" ontrigger="SetVisible((StringLength(param0) gt 0 or bang_miss_test) and bang_miss_icons_enabled);" ]]></find>
+		<insert position="after"><![CDATA[ watch1="bang_miss_show"
+		 ontrigger1="SetVisible(param0);"]]>
+		 </insert>
+		 
+		 <find><![CDATA[<panel height="100%" width="25%"  x="{x=0}" y="{y=0}" noclick="1" align="left" valign="center" ]]></find>
+		 <insert position="after"><![CDATA[			watch1="bang_miss_show"
+			ontrigger1="SetVisible(param0);"]]>
+		</insert>
+	</editfile>
+</modification>
